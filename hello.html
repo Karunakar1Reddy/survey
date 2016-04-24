@@ -1,0 +1,13 @@
+<!doctype>
+<html>
+<body> Welcome <span id="pickedName"></span></br>
+Item: <span id="pickedItem"></span>
+<script>
+var x = parseInt(Math.random()*10);
+var shoppers = ["karunakar","vel","akhil","chakri","pandu","ashok","karthik","balaji","babji","kumar"];
+var items = ["sub","perfumes","spray","sopa","shampoo","books","pen","pencil","eraser","scale"];
+document.getElementById("pickedName").innerHTML=shoppers[x];
+document.getElementById("pickedItem").innerHTML=items[x];
+</script>
+</body>
+</html>
