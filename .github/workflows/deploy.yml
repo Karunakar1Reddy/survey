@@ -19,12 +19,12 @@ jobs:
       
       - name: Update configmap.yaml
         run: |
-          echo "${{ github.event.inputs.key }}: ${{ github.event.inputs.value }}" >> configmap.yml
+          echo "${{ github.event.inputs.key }}: ${{ github.event.inputs.value }}" >> src/configmap.yml
       
       - name: Commit and push changes
         run: |
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'actions@github.com'
-          git add configmap.yml
+          git add src/configmap.yml
           git commit -m "Update configmap.yaml with new key-value pair"
           git push
