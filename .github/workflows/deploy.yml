@@ -1,1 +1,30 @@
-Test
+name: Update ConfigMap
+
+on:
+  workflow_dispatch:
+    inputs:
+      key:
+        description: 'The key to update'
+        required: true
+      value:
+        description: 'The value for the key'
+        required: true
+
+jobs:
+  update-configmap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      
+      - name: Update configmap.yaml
+        run: |
+          echo "${{ github.event.inputs.key }}: ${{ github.event.inputs.value }}" >> configmap.yaml
+      
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git add configmap.yaml
+          git commit -m "Update configmap.yaml with new key-value pair"
+          git push
