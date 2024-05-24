@@ -19,7 +19,7 @@ jobs:
       
       - name: Update configmap.yaml
         run: |
-          echo "${{ github.event.inputs.key }}: "${{ github.event.inputs.value }}"" >> src/configmap.yml
+          echo "${{ github.event.inputs.key }}: \"${{ github.event.inputs.value }}\"" >> src/configmap.yml
       
       - name: Commit and push changes
         run: |
