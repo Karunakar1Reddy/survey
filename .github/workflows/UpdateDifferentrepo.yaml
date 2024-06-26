@@ -54,7 +54,7 @@ jobs:
           pr_body: "This PR updates the ConfigMap with the latest changes."
 
       - name: Send notification to Teams channel
-        uses: some-teams-notification-action@v1
+        uses: actionname/ms-teams-notification@v1.4
         with:
           webhook_url: ${{ secrets.TEAMS_WEBHOOK_URL }}
           message: "A new PR has been created by ${{ github.actor }}. Please review and approve."
