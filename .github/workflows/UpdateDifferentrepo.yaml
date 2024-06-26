@@ -1,0 +1,60 @@
+name: Add/Update ConfigMap in another repo
+
+on:
+  workflow_dispatch:
+    inputs:
+      config_data:
+        description: 'Enter key-value pair in the format {"key1":"value1","key2":"value2"}'
+        required: true
+        type: string
+      configmap_path:
+        description: 'Path to configmap'
+        required: true
+        type: string
+
+jobs:
+  update-configmap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Survey repository
+        uses: actions/checkout@v2
+        with:
+          repository: 'Karunakar1Reddy/survey'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: main
+
+      - name: Parse JSON input and update configmap.yaml
+        run: |
+          echo "Parsing input and updating configmap.yaml..."
+          CONFIG_DATA='${{ github.event.inputs.config_data }}'
+          CONFIGMAP_PATH='${{ github.event.inputs.configmap_path }}'
+          # Your existing script to update the configmap
+
+      - name: Commit changes
+        run: |
+          git config --global user.name '${{ github.actor }}'
+          git config --global user.email '${{ github.actor }}@users.noreply.github.com'
+          git add $CONFIGMAP_PATH
+          git commit -m "Update configmap by ${{ github.actor }}"
+          git push
+
+      - name: Checkout Test repository
+        uses: actions/checkout@v2
+        with:
+          repository: 'Karunakar1Reddy/Test'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: main
+
+      - name: Create Pull Request
+        uses: repo-sync/pull-request@v2
+        with:
+          destination_branch: "main"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pr_title: "Update ConfigMap by ${{ github.actor }}"
+          pr_body: "This PR updates the ConfigMap with the latest changes."
+
+      - name: Send notification to Teams channel
+        uses: some-teams-notification-action@v1
+        with:
+          webhook_url: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          message: "A new PR has been created by ${{ github.actor }}. Please review and approve."
