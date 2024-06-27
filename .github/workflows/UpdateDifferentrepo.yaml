@@ -21,7 +21,7 @@ jobs:
         with:
           repository: 'Karunakar1Reddy/survey'
           token: ${{ secrets.PAT_TOKEN }}
-          ref: main
+          ref: master
 
       - name: Parse JSON input and update configmap.yaml
         run: |
