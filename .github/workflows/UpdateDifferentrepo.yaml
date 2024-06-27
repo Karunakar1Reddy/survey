@@ -53,8 +53,13 @@ jobs:
           pr_title: "Update ConfigMap by ${{ github.actor }}"
           pr_body: "This PR updates the ConfigMap with the latest changes."
 
-      - name: Send notification to Teams channel
-        uses: actionname/send-teams-notification@v1
+      - name: Notify dedicated teams channel
+        uses: jdcargile/ms-teams-notification@v1.4
         with:
-          webhook_url: ${{ secrets.TEAMS_WEBHOOK_URL }}
-          message: "A new PR has been created by ${{ github.actor }}. Please review and approve."
+          github-token: ${{ github.token }}
+          ms-teams-webhook-uri: ${{ secrets.MS_TEAMS_WEBHOOK_URI }}
+          notification-summary: "Your custom notification message"
+          notification-color: "17a2b8"
+          timezone: "America/Denver"
+          verbose-logging: true
+
