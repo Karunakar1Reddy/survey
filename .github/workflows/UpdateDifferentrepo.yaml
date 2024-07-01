@@ -58,6 +58,8 @@ jobs:
             fi
           done
 
+          cat "$CONFIGMAP_PATH"
+
       - name: Commit changes
         run: |
           cd Test
