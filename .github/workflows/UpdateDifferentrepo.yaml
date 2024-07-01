@@ -39,13 +39,24 @@ jobs:
           echo "ConfigMap Path: $CONFIGMAP_PATH"
           echo "Config Data: $CONFIG_DATA"
           # Convert JSON string to key-value pairs and update the configmap.yaml
-          echo "$CONFIG_DATA" | jq -r 'to_entries | .[] | "\(.key)=\(.value)"' | while IFS= read -r line; do
-            key=$(echo $line | cut -d'=' -f1)
-            value=$(echo $line | cut -d'=' -f2)
-            sed -i "s|^\(\s*${key}:\s*\).*|\1${value}|" $CONFIGMAP_PATH
+          echo "$CONFIG_DATA" | jq -r 'to_entries | .[] | "\(.key): \(.value)"' | \
+          while IFS=: read -r key value; do
+            # Trim leading and trailing whitespace from key and value
+            key=$(echo "$key" | xargs)
+            value=$(echo "$value" | xargs)
+
+            # Check if the key is not empty
+            if [ ! -z "$key" ]; then
+              # Check if the key exists in the configmap.yaml file
+              if grep -q "^$key:" "$CONFIGMAP_PATH"; then
+                # Key exists, update its value
+                sed -i "s/^$key:.*/$key: \"$value\"/" "$CONFIGMAP_PATH"
+              else
+                # Key does not exist, add it to the configmap.yaml file
+                echo "$key: \"$value\"" >> "$CONFIGMAP_PATH"
+              fi
+            fi
           done
-          echo "Updated ConfigMap:"
-          cat $CONFIGMAP_PATH
 
       - name: Commit changes
         run: |
