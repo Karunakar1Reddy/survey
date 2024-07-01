@@ -28,13 +28,17 @@ jobs:
           echo "Parsing input and updating configmap.yaml..."
           CONFIG_DATA='${{ github.event.inputs.config_data }}'
           CONFIGMAP_PATH='${{ github.event.inputs.configmap_path }}'
+          echo "ConfigMap Path: $CONFIGMAP_PATH"
+          cat $CONFIGMAP_PATH
           # Your existing script to update the configmap
+          echo "Updated ConfigMap:"
+          cat $CONFIGMAP_PATH
 
       - name: Commit changes
         run: |
           git config --global user.name '${{ github.actor }}'
           git config --global user.email '${{ github.actor }}@users.noreply.github.com'
-          git add $CONFIGMAP_PATH
+          git add .
           git commit -m "Update configmap by ${{ github.actor }}"
           git push
 
@@ -62,4 +66,3 @@ jobs:
           notification-color: "17a2b8"
           timezone: "America/Denver"
           verbose-logging: true
-
