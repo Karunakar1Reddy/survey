@@ -23,11 +23,19 @@ jobs:
           token: ${{ secrets.PAT_TOKEN }}
           ref: master
 
+      - name: Checkout Test repository
+        uses: actions/checkout@v2
+        with:
+          repository: 'Karunakar1Reddy/Test'
+          token: ${{ secrets.PAT_TOKEN }}
+          path: Test
+          ref: main
+
       - name: Parse JSON input and update configmap.yaml
         run: |
           echo "Parsing input and updating configmap.yaml..."
           CONFIG_DATA='${{ github.event.inputs.config_data }}'
-          CONFIGMAP_PATH='${{ github.event.inputs.configmap_path }}'
+          CONFIGMAP_PATH='Test/${{ github.event.inputs.configmap_path }}'
           echo "ConfigMap Path: $CONFIGMAP_PATH"
           echo "Config Data: $CONFIG_DATA"
           # Convert JSON string to key-value pairs and update the configmap.yaml
@@ -41,23 +49,10 @@ jobs:
 
       - name: Commit changes
         run: |
+          cd Test
           git config --global user.name '${{ github.actor }}'
           git config --global user.email '${{ github.actor }}@users.noreply.github.com'
           git add $CONFIGMAP_PATH
-          git commit -m "Update configmap by ${{ github.actor }}"
-          git push
-
-      - name: Checkout Test repository
-        uses: actions/checkout@v2
-        with:
-          repository: 'Karunakar1Reddy/Test'
-          token: ${{ secrets.PAT_TOKEN }}
-          ref: main
-
-      - name: Copy updated configmap.yaml to Test repository
-        run: |
-          cp $CONFIGMAP_PATH .
-          git add $(basename $CONFIGMAP_PATH)
           git commit -m "Update configmap by ${{ github.actor }}"
           git push
 
