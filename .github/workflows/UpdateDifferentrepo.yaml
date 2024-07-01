@@ -1,4 +1,4 @@
-name: Add/Update ConfigMap in another repo
+name: Update ConfigMap in Another Repo
 
 on:
   workflow_dispatch:
@@ -29,8 +29,13 @@ jobs:
           CONFIG_DATA='${{ github.event.inputs.config_data }}'
           CONFIGMAP_PATH='${{ github.event.inputs.configmap_path }}'
           echo "ConfigMap Path: $CONFIGMAP_PATH"
-          cat $CONFIGMAP_PATH
-          # Your existing script to update the configmap
+          echo "Config Data: $CONFIG_DATA"
+          # Convert JSON string to key-value pairs and update the configmap.yaml
+          echo "$CONFIG_DATA" | jq -r 'to_entries | .[] | "\(.key)=\(.value)"' | while IFS= read -r line; do
+            key=$(echo $line | cut -d'=' -f1)
+            value=$(echo $line | cut -d'=' -f2)
+            sed -i "s|^\(\s*${key}:\s*\).*|\1${value}|" $CONFIGMAP_PATH
+          done
           echo "Updated ConfigMap:"
           cat $CONFIGMAP_PATH
 
@@ -38,7 +43,7 @@ jobs:
         run: |
           git config --global user.name '${{ github.actor }}'
           git config --global user.email '${{ github.actor }}@users.noreply.github.com'
-          git add .
+          git add $CONFIGMAP_PATH
           git commit -m "Update configmap by ${{ github.actor }}"
           git push
 
@@ -48,6 +53,13 @@ jobs:
           repository: 'Karunakar1Reddy/Test'
           token: ${{ secrets.PAT_TOKEN }}
           ref: main
+
+      - name: Copy updated configmap.yaml to Test repository
+        run: |
+          cp $CONFIGMAP_PATH .
+          git add $(basename $CONFIGMAP_PATH)
+          git commit -m "Update configmap by ${{ github.actor }}"
+          git push
 
       - name: Create Pull Request
         uses: repo-sync/pull-request@v2
