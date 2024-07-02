@@ -59,7 +59,7 @@ jobs:
           git config --global user.email '${{ github.actor }}@users.noreply.github.com'
           CONFIGMAP_PATH='${{ github.event.inputs.configmap_path }}'
           git status
-          git add $CONFIGMAP_PATH
+          git add src/application/mebp/env/dev/mebp-service/configmap.yml
           git status
           git commit -m "Update configmap by ${{ github.actor }}"
           git push --set-upstream origin update-configmap-${{ github.run_id }}
