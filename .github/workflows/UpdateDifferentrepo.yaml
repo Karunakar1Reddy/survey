@@ -40,7 +40,7 @@ jobs:
         run: |
           echo "Parsing input and updating configmap.yaml..."
           CONFIG_DATA='${{ github.event.inputs.config_data }}'
-          CONFIGMAP_PATH='Test/${{ github.event.inputs.configmap_path }}'
+          CONFIGMAP_PATH='test-repo/${{ github.event.inputs.configmap_path }}'
           echo "ConfigMap Path: $CONFIGMAP_PATH"
           echo "Config Data: $CONFIG_DATA"
           # Convert JSON string to key-value pairs and update the configmap.yaml
