@@ -33,7 +33,7 @@ jobs:
 
       - name: Create a new branch
         run: |
-          cd Test
+          cd test-repo
           git checkout -b update-configmap-${{ github.run_id }}
 
       - name: Parse JSON input and update configmap.yaml
