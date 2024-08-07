@@ -16,13 +16,18 @@ jobs:
   update-configmap:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout survey repository
+      - name: Checkout Survey repository
         uses: actions/checkout@v2
+        with:
+          repository: 'Karunakar1Reddy/survey'
+          token: ${{ secrets.PAT_TOKEN }}
+          ref: master
 
       - name: Checkout Test repository
         uses: actions/checkout@v2
         with:
-          repository: Karunakar1Reddy/Test
+          repository: 'Karunakar1Reddy/Test'
+          token: ${{ secrets.PAT_TOKEN }}
           path: test-repo
           ref: master
 
