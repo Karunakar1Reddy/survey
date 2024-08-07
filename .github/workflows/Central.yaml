@@ -24,6 +24,7 @@ jobs:
         with:
           repository: Karunakar1Reddy/Test
           path: test-repo
+          ref: master
 
       - name: Parse JSON input and update configmap.yaml
         run: |
