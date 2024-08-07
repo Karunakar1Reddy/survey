@@ -43,6 +43,10 @@ jobs:
           CONFIGMAP_PATH='test-repo/${{ github.event.inputs.configmap_path }}'
           echo "ConfigMap Path: $CONFIGMAP_PATH"
           echo "Config Data: $CONFIG_DATA"
+          if [ ! -f "$CONFIGMAP_PATH" ]; then
+            echo "Error: $CONFIGMAP_PATH does not exist."
+            exit 1
+          fi
           # Convert JSON string to key-value pairs and update the configmap.yaml
           echo "$CONFIG_DATA" | jq -r 'to_entries | .[] | "\(.key)=\(.value)"' | while IFS= read -r line; do
             key=$(echo $line | cut -d'=' -f1)
@@ -52,23 +56,23 @@ jobs:
           echo "Updated ConfigMap:"
           cat $CONFIGMAP_PATH
 
-      - name: Create a new branch and push changes
+      - name: Commit and push changes
         run: |
           cd test-repo
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'actions@github.com'
-          git checkout -b update-configmap
-          git add "$CONFIGMAP_PATH"
+          git add "${{ github.event.inputs.configmap_path }}"
           git commit -m 'Update configmap.yml with new configuration'
-          git push --set-upstream origin update-configmap
+          git push --set-upstream origin update-configmap-${{ github.run_id }}
+
       - name: Create a pull request
         id: create_pr
         uses: peter-evans/create-pull-request@v4
         with:
           token: ${{ secrets.PAT_TOKEN }}
           commit-message: 'Update configmap.yml with new configuration'
-          branch: update-configmap
-          base: master
+          branch: update-configmap-${{ github.run_id }}
+          base: main
           title: 'Update ConfigMap'
           body: 'This PR updates the configmap with new configuration.'
 
@@ -78,11 +82,12 @@ jobs:
           curl -H 'Content-Type: application/json' \
                -d "{\"text\": \"A new PR has been created: $PR_URL\"}" \
                ${{ secrets.TEAMS_WEBHOOK_URL }}
+
       - name: Merge PR after approval
         if: github.event.pull_request.merged == true
         run: |
           cd test-repo
-          git checkout master
-          git pull origin master
-          git merge update-configmap
-          git push origin master
+          git checkout main
+          git pull origin main
+          git merge update-configmap-${{ github.run_id }}
+          git push origin main
