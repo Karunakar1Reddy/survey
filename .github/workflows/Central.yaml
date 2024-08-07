@@ -16,8 +16,14 @@ jobs:
   update-configmap:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout survey repository
         uses: actions/checkout@v2
+
+      - name: Checkout Test repository
+        uses: actions/checkout@v2
+        with:
+          repository: Karunakar1Reddy/Test
+          path: test-repo
 
       - name: Parse JSON input and update configmap.yaml
         run: |
@@ -46,11 +52,40 @@ jobs:
           done
           
           cat "$CONFIGMAP_PATH"
-      - name: Push changes to repository
+
+      - name: Create a new branch and push changes
         run: |
+          cd test-repo
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'actions@github.com'
-          CONFIGMAP_PATH='${{ github.event.inputs.configmap_path }}'
+          git checkout -b update-configmap
           git add "$CONFIGMAP_PATH"
           git commit -m 'Update configmap.yml with new configuration'
-          git push
+          git push --set-upstream origin update-configmap
+
+      - name: Create a pull request
+        id: create_pr
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'Update configmap.yml with new configuration'
+          branch: update-configmap
+          base: master
+          title: 'Update ConfigMap'
+          body: 'This PR updates the configmap with new configuration.'
+
+      - name: Post PR link to Teams channel
+        run: |
+          PR_URL=$(jq -r '.pull_request.html_url' < $GITHUB_EVENT_PATH)
+          curl -H 'Content-Type: application/json' \
+               -d "{\"text\": \"A new PR has been created: $PR_URL\"}" \
+               ${{ secrets.TEAMS_WEBHOOK_URL }}
+
+      - name: Merge PR after approval
+        if: github.event.pull_request.merged == true
+        run: |
+          cd test-repo
+          git checkout master
+          git pull origin master
+          git merge update-configmap
+          git push origin master
