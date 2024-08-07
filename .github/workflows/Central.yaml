@@ -1,0 +1,56 @@
+name: Central to PDS
+
+on:
+  workflow_dispatch:
+    inputs:
+      config_data:
+        description: 'Enter key-value pair in the format {"key1":"value1","key2":"value2"}'
+        required: true
+        type: string
+      configmap_path:
+        description: 'Path to configmap'
+        required: true
+        type: string
+
+jobs:
+  update-configmap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Parse JSON input and update configmap.yaml
+        run: |
+          echo "Parsing input and updating configmap.yaml..."
+          CONFIG_DATA='${{ github.event.inputs.config_data }}'
+          CONFIGMAP_PATH='${{ github.event.inputs.configmap_path }}'
+          echo "CONFIG_DATA: $CONFIG_DATA"
+          echo "CONFIGMAP_PATH: $CONFIGMAP_PATH"
+          # Loop through each key-value pair in the JSON data
+          echo "$CONFIG_DATA" | jq -r 'to_entries | .[] | "\(.key): \(.value)"' | \
+          while IFS=: read -r key value; do
+            # Trim leading and trailing whitespace from key and value
+            key=$(echo "$key" | xargs)
+            value=$(echo "$value" | xargs)
+            # Check if the key is not empty
+            if [ ! -z "$key" ]; then
+              # Check if the key exists in the configmap.yaml file
+              if grep -q "^$key:" "$CONFIGMAP_PATH"; then
+                # Key exists, update its value
+                sed -i "s/^$key:.*/$key: \"$value\"/" "$CONFIGMAP_PATH"
+              else
+                # Key does not exist, add it to the configmap.yaml file
+                echo "$key: \"$value\"" >> "$CONFIGMAP_PATH"
+              fi
+            fi
+          done
+          
+          cat "$CONFIGMAP_PATH"
+      - name: Push changes to repository
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          CONFIGMAP_PATH='${{ github.event.inputs.configmap_path }}'
+          git add "$CONFIGMAP_PATH"
+          git commit -m 'Update configmap.yml with new configuration'
+          git push
