@@ -75,16 +75,22 @@ jobs:
           git commit -m 'Update configmap.yml with new configuration'
           git push --set-upstream origin update-configmap-${{ github.run_id }}
 
-      - name: Create a pull request
-        id: create_pr
-        uses: peter-evans/create-pull-request@v4
-        with:
-          token: ${{ secrets.PAT_TOKEN }}
-          commit-message: 'Update configmap.yml with new configuration'
-          branch: update-configmap-${{ github.run_id }}
-          base: main
-          title: 'Update ConfigMap'
-          body: 'This PR updates the configmap with new configuration.'
+      # - name: Create a pull request
+      #   id: create_pr
+      #   uses: peter-evans/create-pull-request@v4
+      #   with:
+      #     token: ${{ secrets.PAT_TOKEN }}
+      #     commit-message: 'Update configmap.yml with new configuration'
+      #     branch: update-configmap-${{ github.run_id }}
+      #     base: main
+      #     title: 'Update ConfigMap'
+      #     body: 'This PR updates the configmap with new configuration.'
+
+      - name: Create pull request
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          gh pr create --title 'Update ConfigMap' --body 'This PR updates the configmap with new configuration.' --base main --head update-configmap-${{ github.run_id }}
 
       - name: Post PR link to Teams channel
         run: |
