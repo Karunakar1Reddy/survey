@@ -86,14 +86,11 @@ jobs:
       #     title: 'Update ConfigMap'
       #     body: 'This PR updates the configmap with new configuration.'
 
-      - name: Wait for branch to be recognized
-        run: sleep 10
-
       - name: Create pull request
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          git diff main...update-configmap-${{ github.run_id }}
+          git diff main..update-configmap-${{ github.run_id }}
           gh pr create --title 'Update ConfigMap' --body 'This PR updates the configmap with new configuration.' --base main --head Karunakar1Reddy:update-configmap-${{ github.run_id }}
 
       - name: Post PR link to Teams channel
