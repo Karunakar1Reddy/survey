@@ -86,17 +86,8 @@ jobs:
       #     title: 'Update ConfigMap'
       #     body: 'This PR updates the configmap with new configuration.'
 
-      - name: Install GitHub CLI
-        run: sudo apt-get install gh
-
-      # - name: Authenticate GitHub CLI
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-      #   run: gh auth login --with-token <<< "${{ secrets.PAT_TOKEN }}"
-
-      - name: Verify branches
-        run: |
-          git branch -r
+      - name: Wait for branch to be recognized
+        run: sleep 10
 
       - name: Create pull request
         env:
