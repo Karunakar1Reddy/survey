@@ -107,7 +107,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          gh pr create --title 'Update ConfigMap' --body 'This PR updates the configmap with new configuration.' --base main --head update-configmap-${{ github.run_id }} --verbose
+          echo "Creating pull request..."
+          PR_OUTPUT=$(gh pr create --title 'Update ConfigMap' --body 'This PR updates the configmap with new configuration.' --base main --head update-configmap-${{ github.run_id }} 2>&1)
+          echo "$PR_OUTPUT"
 
       - name: Post PR link to Teams channel
         run: |
