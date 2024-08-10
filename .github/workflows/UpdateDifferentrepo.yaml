@@ -91,7 +91,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           echo "Creating pull request..."
-          gh pr create --fill
+          gh pr create
 
       - name: Post PR link to Teams channel
         run: |
