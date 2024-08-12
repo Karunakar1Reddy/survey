@@ -37,7 +37,7 @@ jobs:
           git checkout -b update-configmap-${{ github.run_id }}
           
       - name: Store branch name
-        run: echo "Branch name is ${{ steps.create_branch.outputs.branch_name }}" >> $GITHUB_ENV
+        run: Branch_Name='${{ steps.create_branch.outputs.branch_name }}'
         
       - name: Parse JSON input and update configmap.yaml
         run: |
@@ -93,7 +93,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           cd test-repo
-          gh pr create --base main --head $GITHUB_ENV --title "This PR updates the configmap with new configuration" --body "Test"
+          gh pr create --base main --head $Branch_Name --title "This PR updates the configmap with new configuration" --body "Test"
       
       - name: Post PR link to Teams channel
         run: |
