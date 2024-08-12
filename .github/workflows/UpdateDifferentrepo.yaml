@@ -31,47 +31,51 @@ jobs:
           path: test-repo
           ref: main
 
-      # - name: Create a new branch
-      #   run: |
-      #     cd test-repo
-      #     git checkout -b update-configmap-${{ github.run_id }}
-      # - name: Parse JSON input and update configmap.yaml
-      #   run: |
-      #     echo "Parsing input and updating configmap.yaml..."
-      #     CONFIG_DATA='${{ github.event.inputs.config_data }}'
-      #     CONFIGMAP_PATH='test-repo/${{ github.event.inputs.configmap_path }}'
-      #     echo "ConfigMap Path: $CONFIGMAP_PATH"
-      #     echo "Config Data: $CONFIG_DATA"
+      - name: Create a new branch
+        run: |
+          cd test-repo
+          git checkout -b update-configmap-${{ github.run_id }}
           
-      #     # Loop through each key-value pair in the JSON data
-      #     echo "$CONFIG_DATA" | jq -r 'to_entries | .[] | "\(.key): \(.value)"' | \
-      #     while IFS=: read -r key value; do
-      #       # Trim leading and trailing whitespace from key and value
-      #       key=$(echo "$key" | xargs)
-      #       value=$(echo "$value" | xargs)
+      - name: Store branch name
+        run: echo "Branch name is ${{ steps.create_branch.outputs.branch_name }}" >> $GITHUB_ENV
+        
+      - name: Parse JSON input and update configmap.yaml
+        run: |
+          echo "Parsing input and updating configmap.yaml..."
+          CONFIG_DATA='${{ github.event.inputs.config_data }}'
+          CONFIGMAP_PATH='test-repo/${{ github.event.inputs.configmap_path }}'
+          echo "ConfigMap Path: $CONFIGMAP_PATH"
+          echo "Config Data: $CONFIG_DATA"
+          
+          # Loop through each key-value pair in the JSON data
+          echo "$CONFIG_DATA" | jq -r 'to_entries | .[] | "\(.key): \(.value)"' | \
+          while IFS=: read -r key value; do
+            # Trim leading and trailing whitespace from key and value
+            key=$(echo "$key" | xargs)
+            value=$(echo "$value" | xargs)
             
-      #       # Check if the key is not empty
-      #       if [ ! -z "$key" ]; then
-      #         # Check if the key exists in the configmap.yaml file
-      #         if grep -q "^$key:" "$CONFIGMAP_PATH"; then
-      #           # Key exists, update its value
-      #           sed -i "s/^$key:.*/$key: \"$value\"/" "$CONFIGMAP_PATH"
-      #         else
-      #           # Key does not exist, add it to the configmap.yaml file
-      #           echo "$key: \"$value\"" >> "$CONFIGMAP_PATH"
-      #         fi
-      #       fi
-      #     done
+            # Check if the key is not empty
+            if [ ! -z "$key" ]; then
+              # Check if the key exists in the configmap.yaml file
+              if grep -q "^$key:" "$CONFIGMAP_PATH"; then
+                # Key exists, update its value
+                sed -i "s/^$key:.*/$key: \"$value\"/" "$CONFIGMAP_PATH"
+              else
+                # Key does not exist, add it to the configmap.yaml file
+                echo "$key: \"$value\"" >> "$CONFIGMAP_PATH"
+              fi
+            fi
+          done
           
-      #     cat "$CONFIGMAP_PATH"
-      # - name: Commit and push changes
-      #   run: |
-      #     cd test-repo
-      #     git config --global user.name 'GitHub Actions'
-      #     git config --global user.email 'actions@github.com'
-      #     git add "${{ github.event.inputs.configmap_path }}"
-      #     git commit -m 'Update configmap.yml with new configuration'
-      #     git push --set-upstream origin update-configmap-${{ github.run_id }}
+          cat "$CONFIGMAP_PATH"
+      - name: Commit and push changes
+        run: |
+          cd test-repo
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git add "${{ github.event.inputs.configmap_path }}"
+          git commit -m 'Update configmap.yml with new configuration'
+          git push --set-upstream origin update-configmap-${{ github.run_id }}
           
       # - name: Create a pull request
       #   id: create_pr
@@ -89,7 +93,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           cd test-repo
-          gh pr create --base main --head update-configmap-10332025204 --title "This PR updates the configmap with new configuration" --body "Test"
+          gh pr create --base main --head $GITHUB_ENV --title "This PR updates the configmap with new configuration" --body "Test"
       
       - name: Post PR link to Teams channel
         run: |
