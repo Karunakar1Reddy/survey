@@ -97,6 +97,8 @@ jobs:
           gh pr create --base main --head ${{ steps.set-branch-name.outputs.branch_name }} --title "This PR updates the configmap with new configuration" --body "Testing"
       
       - name: Post PR link to Teams channel
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           PR_URL=$(gh pr view ${{ steps.set-branch-name.outputs.branch_name }} --json url -q .url)
           curl -H 'Content-Type: application/json' \
