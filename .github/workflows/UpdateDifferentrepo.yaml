@@ -78,32 +78,41 @@ jobs:
           git commit -m 'Update configmap.yml with new configuration'
           git push --set-upstream origin update-configmap-${{ github.run_id }}
           
-      # - name: Create a pull request
-      #   id: create_pr
-      #   uses: peter-evans/create-pull-request@v4
-      #   with:
-      #     token: ${{ secrets.PAT_TOKEN }}
-      #     commit-message: 'Update configmap.yml with new configuration'
-      #     branch: update-configmap-${{ github.run_id }}
-      #     base: main
-      #     title: 'Update ConfigMap'
-      #     body: 'This PR updates the configmap with new configuration.'
+      # - name: Create pull request
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+      #   run: |
+      #     cd test-repo
+      #     gh pr create --base main --head ${{ steps.set-branch-name.outputs.branch_name }} --title "This PR updates the configmap with new configuration" --body "Testing"
 
       - name: Create pull request
+        id: create-pr
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           cd test-repo
-          gh pr create --base main --head ${{ steps.set-branch-name.outputs.branch_name }} --title "This PR updates the configmap with new configuration" --body "Testing"
+          PR_URL=$(gh pr create --base main --head ${{ steps.set-branch-name.outputs.branch_name }} --title "This PR updates the configmap with new configuration" --body "Testing" --json url -q .url)
+          echo "::set-output name=pr_url::$PR_URL"
+
       
       - name: Post PR link to Teams channel
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          PR_URL=$(gh pr view ${{ steps.set-branch-name.outputs.branch_name }} --json url -q .url)
+          PR_URL=${{ steps.create-pr.outputs.pr_url }}
           curl -H 'Content-Type: application/json' \
                -d "{\"text\": \"A new PR has been created: $PR_URL\"}" \
                ${{ secrets.TEAMS_WEBHOOK_URL }}
+               
+      # - name: Post PR link to Teams channel
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+      #   run: |
+      #     PR_URL=$(gh pr view ${{ steps.set-branch-name.outputs.branch_name }} --json url -q .url)
+      #     curl -H 'Content-Type: application/json' \
+      #          -d "{\"text\": \"A new PR has been created: $PR_URL\"}" \
+      #          ${{ secrets.TEAMS_WEBHOOK_URL }}
+               
       - name: Merge PR after approval
         if: github.event.pull_request.merged == true
         run: |
