@@ -98,7 +98,7 @@ jobs:
       
       - name: Post PR link to Teams channel
         run: |
-          PR_URL=$(jq -r '.pull_request.html_url' < $GITHUB_EVENT_PATH)
+          PR_URL=$(gh pr view ${{ steps.set-branch-name.outputs.branch_name }} --json url -q .url)
           curl -H 'Content-Type: application/json' \
                -d "{\"text\": \"A new PR has been created: $PR_URL\"}" \
                ${{ secrets.TEAMS_WEBHOOK_URL }}
