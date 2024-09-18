@@ -48,12 +48,19 @@ jobs:
           echo "ConfigMap Path: $CONFIGMAP_PATH"
           echo "Config Data: $CONFIG_DATA"
           
+          # # Loop through each key-value pair in the JSON data
+          # echo "$CONFIG_DATA" | jq -r 'to_entries | .[] | "\(.key): \(.value)"' | \
+          # while IFS=: read -r key value; do
+          #   # Trim leading and trailing whitespace from key and value
+          #   key=$(echo "$key" | xargs)
+          #   value=$(echo "$value" | xargs)
+
           # Loop through each key-value pair in the JSON data
           echo "$CONFIG_DATA" | jq -r 'to_entries | .[] | "\(.key): \(.value)"' | \
-          while IFS=: read -r key value; do
+          while IFS=$'\n' read -r line; do
             # Trim leading and trailing whitespace from key and value
-            key=$(echo "$key" | xargs)
-            value=$(echo "$value" | xargs)
+            key=$(echo "$line" | cut -d ':' -f 1 | xargs)
+            value=$(echo "$line" | cut -d ':' -f 2- | xargs)
             
             # Check if the key is not empty
             if [ ! -z "$key" ]; then
