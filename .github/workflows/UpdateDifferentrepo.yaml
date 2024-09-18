@@ -60,7 +60,8 @@ jobs:
               # Check if the key exists in the configmap.yaml file
               if grep -q "^$key:" "$CONFIGMAP_PATH"; then
                 # Key exists, update its value
-                sed -i "s/^$key:.*/$key: \"$value\"/" "$CONFIGMAP_PATH"
+                # sed -i "s/^$key:.*/$key: \"$value\"/" "$CONFIGMAP_PATH"
+                sed -i "s|^$key:.*|$key: \"$value\"|" "$CONFIGMAP_PATH"
               else
                 # Key does not exist, add it to the configmap.yaml file
                 echo "$key: \"$value\"" >> "$CONFIGMAP_PATH"
