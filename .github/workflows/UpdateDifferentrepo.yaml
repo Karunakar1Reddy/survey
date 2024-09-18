@@ -48,29 +48,20 @@ jobs:
           echo "ConfigMap Path: $CONFIGMAP_PATH"
           echo "Config Data: $CONFIG_DATA"
           
-          # # Loop through each key-value pair in the JSON data
-          # echo "$CONFIG_DATA" | jq -r 'to_entries | .[] | "\(.key): \(.value)"' | \
-          # while IFS=: read -r key value; do
-          #   # Trim leading and trailing whitespace from key and value
-          #   key=$(echo "$key" | xargs)
-          #   value=$(echo "$value" | xargs)
-
           # Loop through each key-value pair in the JSON data
-          echo "$CONFIG_DATA" | jq -r 'to_entries | .[] | @base64' | \
-          while IFS= read -r entry; do
-            _jq() {
-              echo "${entry}" | base64 --decode | jq -r "${1}"
-            }
-            key=$(_jq '.key')
-            value=$(_jq '.value')
+          echo "$CONFIG_DATA" | jq -r 'to_entries | .[] | "\(.key): \(.value)"' | \
+          while IFS=: read -r key value; do
+            # Trim leading and trailing whitespace from key and value
+            key=$(echo "$key" | xargs)
+            value=$(echo "$value" | xargs)
+            value=$(echo "$value" | sed 's/[&/\]/\\&/g')
             
             # Check if the key is not empty
             if [ ! -z "$key" ]; then
               # Check if the key exists in the configmap.yaml file
               if grep -q "^$key:" "$CONFIGMAP_PATH"; then
                 # Key exists, update its value
-                # sed -i "s/^$key:.*/$key: \"$value\"/" "$CONFIGMAP_PATH"
-                sed -i "s|^$key:.*|$key: \"$value\"|" "$CONFIGMAP_PATH"
+                sed -i "s/^$key:.*/$key: \"$value\"/" "$CONFIGMAP_PATH"
               else
                 # Key does not exist, add it to the configmap.yaml file
                 echo "$key: \"$value\"" >> "$CONFIGMAP_PATH"
