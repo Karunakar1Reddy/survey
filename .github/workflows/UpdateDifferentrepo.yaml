@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       config_data:
-        description: 'Enter key-value pair in the format {"key1":"value1","key2":"value2"}'
+        description: 'Enter key-value pair to update/add in the below format only eg:{"key1":"value1","key2":"value2"}'
         required: true
         type: string
       configmap_path:
-        description: 'Path to configmap'
+        description: 'Path to configmap eg: src/application/mebp/env/envname/servicename/configmap.yml'
         required: true
         type: string
 
