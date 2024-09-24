@@ -84,8 +84,8 @@ jobs:
           
       - name: Create pull request
         id: create-pr
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        # env:
+        #   # GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           cd test-repo
           PR_URL=$(gh pr create --base main --head ${{ steps.set-branch-name.outputs.branch_name }} --title "This PR updates the configmap with new configuration" --body "Testing")
@@ -93,8 +93,8 @@ jobs:
           echo "::set-output name=pr_url::https://github.com/Karunakar1Reddy/Test/pull/$PR_NUMBER"
 
       - name: Post PR link to Teams channel
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        # env:
+        #   # GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           PR_URL=${{ steps.create-pr.outputs.pr_url }}
           curl -H 'Content-Type: application/json' \
