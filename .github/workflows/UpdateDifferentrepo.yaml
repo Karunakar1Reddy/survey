@@ -55,16 +55,19 @@ jobs:
             key=$(echo "$key" | xargs)
             value=$(echo "$value" | xargs)
             value=$(echo "$value" | sed 's/[&/\]/\\&/g')
+
+            # Format the key by replacing spaces and special characters with underscores
+              formatted_key=$(echo "$key" | sed 's/[^a-zA-Z0-9_]/_/g')
             
             # Check if the key is not empty
-            if [ ! -z "$key" ]; then
+            if [ ! -z "$formatted_key" ]; then
               # Check if the key exists in the configmap.yaml file
-              if grep -q "^$key:" "$CONFIGMAP_PATH"; then
+              if grep -q "^$formatted_key:" "$CONFIGMAP_PATH"; then
                 # Key exists, update its value
-                sed -i "s/^$key:.*/$key: \"$value\"/" "$CONFIGMAP_PATH"
+                sed -i "s/^$formatted_key:.*/$formatted_key: \"$value\"/" "$CONFIGMAP_PATH"
               else
                 # Key does not exist, add it to the configmap.yaml file
-                echo "$key: \"$value\"" >> "$CONFIGMAP_PATH"
+                echo "$formatted_key: \"$value\"" >> "$CONFIGMAP_PATH"
               fi
             fi
           done
