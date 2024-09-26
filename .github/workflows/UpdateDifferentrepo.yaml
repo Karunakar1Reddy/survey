@@ -85,6 +85,7 @@ jobs:
           cd test-repo
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'actions@github.com'
+          CONFIGMAP_PATH="test-repo/src/application/mebp/env/$ENV_NAME/$SERVICE_NAME/configmap.yml"
           git add "$CONFIGMAP_PATH"
           git commit -m 'Update configmap.yml with new configuration'
           git push --set-upstream origin update-configmap-${{ github.run_id }}
