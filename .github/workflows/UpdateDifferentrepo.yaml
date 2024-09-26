@@ -1,4 +1,4 @@
-name: Update ConfigMap in Another Repo
+name: Update ConfigMap in Another Repo 
 
 on:
   workflow_dispatch:
@@ -7,8 +7,12 @@ on:
         description: 'Enter key-value pair to update/add in the below format only eg:{"key1":"value1","key2":"value2"}'
         required: true
         type: string
-      configmap_path:
-        description: 'Path to configmap eg: src/application/mebp/env/envname/servicename/configmap.yml'
+      envname:
+        description: 'Environment name (e.g., dev, prod)'
+        required: true
+        type: string
+      servicename:
+        description: 'Service name (e.g., service1, service2)'
         required: true
         type: string
 
@@ -20,14 +24,14 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: 'Karunakar1Reddy/survey'
-          # token: ${{ secrets.PAT_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
           ref: master
 
       - name: Checkout Test repository
         uses: actions/checkout@v2
         with:
           repository: 'Karunakar1Reddy/Test'
-          # token: ${{ secrets.PAT_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
           path: test-repo
           ref: main
 
@@ -44,7 +48,10 @@ jobs:
         run: |
           echo "Parsing input and updating configmap.yaml..."
           CONFIG_DATA='${{ github.event.inputs.config_data }}'
-          CONFIGMAP_PATH='test-repo/${{ github.event.inputs.configmap_path }}'
+          ENV_NAME='${{ github.event.inputs.envname }}'
+          SERVICE_NAME='${{ github.event.inputs.servicename }}'
+          CONFIGMAP_PATH="test-repo/src/application/mebp/env/$ENV_NAME/$SERVICE_NAME/configmap.yml"
+          
           echo "ConfigMap Path: $CONFIGMAP_PATH"
           echo "Config Data: $CONFIG_DATA"
           
@@ -55,9 +62,8 @@ jobs:
             key=$(echo "$key" | xargs)
             value=$(echo "$value" | xargs)
             value=$(echo "$value" | sed 's/[&/\]/\\&/g')
-
             # Format the key by replacing spaces and special characters with underscores
-              formatted_key=$(echo "$key" | sed 's/[^a-zA-Z0-9_]/_/g')
+            formatted_key=$(echo "$key" | sed 's/[^a-zA-Z0-9_]/_/g')
             
             # Check if the key is not empty
             if [ ! -z "$formatted_key" ]; then
@@ -73,19 +79,20 @@ jobs:
           done
           
           cat "$CONFIGMAP_PATH"
+          
       - name: Commit and push changes
         run: |
           cd test-repo
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'actions@github.com'
-          git add "${{ github.event.inputs.configmap_path }}"
+          git add "$CONFIGMAP_PATH"
           git commit -m 'Update configmap.yml with new configuration'
           git push --set-upstream origin update-configmap-${{ github.run_id }}
           
       - name: Create pull request
         id: create-pr
-        # env:
-        #   # GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           cd test-repo
           PR_URL=$(gh pr create --base main --head ${{ steps.set-branch-name.outputs.branch_name }} --title "This PR updates the configmap with new configuration" --body "Testing")
@@ -93,11 +100,10 @@ jobs:
           echo "::set-output name=pr_url::https://github.com/Karunakar1Reddy/Test/pull/$PR_NUMBER"
 
       - name: Post PR link to Teams channel
-        # env:
-        #   # GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           PR_URL=${{ steps.create-pr.outputs.pr_url }}
           curl -H 'Content-Type: application/json' \
                -d "{\"text\": \"@PR Approvers A new PR has been created: $PR_URL\"}" \
                ${{ secrets.TEAMS_WEBHOOK_URL }}
-               
