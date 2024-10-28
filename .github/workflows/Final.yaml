@@ -7,15 +7,15 @@ on:
         description: 'Enter key-value pair to update/add in the below format ONLY eg:{"key1":"value1","key2":"value2"}'
         required: true
         type: string
-                appcode:
+      appcode:
         description: 'Application Code (e.g: MEBP)'
         required: true
         type: string
-                servicename:
+      servicename:
         description: 'Service name (e.g., mebp-comp-price-ui)'
         required: true
         type: string
-                envname:
+      envname:
         description: 'Environment name (e.g., dev, prod)'
         required: true
         type: string
@@ -27,14 +27,16 @@ jobs:
       - name: Checkout esgh-central-workflow-aks repository
         uses: actions/checkout@v2
         with:
-          repository: 'albertsons/esgh-central-workflow-aks'
+          # repository: 'albertsons/esgh-central-workflow-aks'
+          repository: 'Karunakar1Reddy/survey'
           token: ${{ secrets.PAT_TOKEN }}
           ref: master
 
       - name: Checkout platform-devops-helmcharts repository
         uses: actions/checkout@v2
         with:
-          repository: 'albertsons/platform-devops-helmcharts'
+          # repository: 'albertsons/platform-devops-helmcharts'
+          repository: 'Karunakar1Reddy/Test'
           token: ${{ secrets.PAT_TOKEN }}
           path: helm-repo
           ref: main
