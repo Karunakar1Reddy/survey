@@ -27,19 +27,17 @@ jobs:
       - name: Checkout esgh-central-workflow-aks repository
         uses: actions/checkout@v2
         with:
-          # repository: 'albertsons/esgh-central-workflow-aks'
-          repository: 'Karunakar1Reddy/survey'
+          repository: 'albertsons/esgh-central-workflow-aks'
           token: ${{ secrets.PAT_TOKEN }}
-          ref: master
+          ref: v3
 
       - name: Checkout platform-devops-helmcharts repository
         uses: actions/checkout@v2
         with:
-          # repository: 'albertsons/platform-devops-helmcharts'
-          repository: 'Karunakar1Reddy/Test'
+          repository: 'albertsons/platform-devops-helmcharts'
           token: ${{ secrets.PAT_TOKEN }}
           path: helm-repo
-          ref: main
+          ref: master
 
       - name: Create a new branch
         run: |
